@@ -25,22 +25,26 @@
 # Constants
 Consts = {
     # Speed limits
-    "MAX_VELOC": 100,
+    # "MAX_VELOC": 100,
+    "MAX_VELOC": 0.4,
     # Variables to hold position bounds
     "WORLD_X": 1000,
     "WORLD_Y": 500,
     # DEFAULT_RADIUS
     "DEFAULT_RADIUS": 15,
     # CELLS_COUNT
-    "CELLS_COUNT": 100,
+    "CELLS_COUNT": 10,
     # EJECT_MASS_RATIO
     "EJECT_MASS_RATIO": 0.01,
     # FPS
     "FPS": 15,
+    # "FPS": 30,  # 15
     # FRAME_DELTA
     "FRAME_DELTA": 3,
-    # DELTA_VELOC
+    # "FRAME_DELTA": 1,
+    # DELTA_VELOC  # the higher the faster
     "DELTA_VELOC": 5,
+    # "DELTA_VELOC": 0.1,
     # MAX_TIME
     "MAX_TIME": 30,
     # MAX_FRAME

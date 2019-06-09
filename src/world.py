@@ -32,8 +32,9 @@ from time import perf_counter as pf
 from consts import Consts
 from cell import Cell
 
+
 class World():
-    def __init__(self, player0, player1, names = None, recorders = None):
+    def __init__(self, player0, player1=None, names=None, recorders=None):
         # Variables and setup
         self.cells_count = 0
         # Bind stat recorders
@@ -41,6 +42,7 @@ class World():
         # Init
         self.new_game()
         self.player = [player0, player1]
+        # self.player = [player0]
         self.names = names
 
     # Methods
@@ -53,25 +55,28 @@ class World():
             
 
         """
-        self.cells = [] # Array of cells
+        self.cells = []  # Array of cells
         self.frame_count = 0
         self.database = []
         self.timer = [Consts["MAX_TIME"], Consts["MAX_TIME"]]
         self.result = None
         # Define the players first
-        self.cells.append(Cell(0, [Consts["WORLD_X"] / 4, Consts["WORLD_Y"] / 2], [0, 0], Consts["DEFAULT_RADIUS"]))
-        self.cells.append(Cell(1, [Consts["WORLD_X"] / 4 * 3, Consts["WORLD_Y"] / 2], [0, 0], Consts["DEFAULT_RADIUS"]))
+        self.cells.append(Cell(0, [Consts["WORLD_X"] / 4, Consts["WORLD_Y"] / 2], [0, 0],
+                               Consts["DEFAULT_RADIUS"]))
+        # self.cells.append(Cell(1, [Consts["WORLD_X"] / 4 * 3, Consts["WORLD_Y"] / 2], [0, 0],
+        #                        Consts["DEFAULT_RADIUS"]))
         # Generate a bunch of random cells
         for i in range(Consts["CELLS_COUNT"]):
             if i < 4:
-                rad = 1.5 + (random.random() * 1.5) # Small cells
+                rad = 1.5 + (random.random() * 1.5)  # Small cells
             elif i < 10:
-                rad = 10 + (random.random() * 4) # Big cells
+                rad = 10 + (random.random() * 4)  # Big cells
             else:
-                rad = 2 + (random.random() * 9) # Everything else
+                rad = 2 + (random.random() * 9)  # Everything else
             x = Consts["WORLD_X"] * random.random()
             y = Consts["WORLD_Y"] * random.random()
-            cell = Cell(i + 2, [x, y], [(random.random() - 0.5) * 2, (random.random() - 0.5) * 2], rad)
+            cell = Cell(i + 2, [x, y], [(random.random() - 0.5) * 2, (random.random() - 0.5) * 2],
+                        rad)
             safe_dist = Consts["SAFE_DIST"] + rad
             while min(map(cell.distance_from, self.cells[:2])) < safe_dist:
                 cell.pos = [
@@ -101,7 +106,7 @@ class World():
             self.game_over(-1, cause, (flag0, flag1))
         return bool(flag0 or flag1)
 
-    def game_over(self, winner, cause, detail = None):
+    def game_over(self, winner, cause, detail=None):
         """Game over.
 
         Args:
@@ -141,8 +146,10 @@ class World():
         # Reduce force in proportion to area
         fx = math.sin(theta)
         fy = math.cos(theta)
-        new_veloc_x = player.veloc[0] + Consts["DELTA_VELOC"] * fx * (1 - Consts["EJECT_MASS_RATIO"])
-        new_veloc_y = player.veloc[1] + Consts["DELTA_VELOC"] * fy * (1 - Consts["EJECT_MASS_RATIO"])
+        new_veloc_x = player.veloc[0] + Consts["DELTA_VELOC"] * fx * (
+                    1 - Consts["EJECT_MASS_RATIO"])
+        new_veloc_y = player.veloc[1] + Consts["DELTA_VELOC"] * fy * (
+                    1 - Consts["EJECT_MASS_RATIO"])
         # Push player
         player.veloc[0] -= Consts["DELTA_VELOC"] * fx * Consts["EJECT_MASS_RATIO"]
         player.veloc[1] -= Consts["DELTA_VELOC"] * fy * Consts["EJECT_MASS_RATIO"]
@@ -153,7 +160,8 @@ class World():
         # Create new cell
         new_pos_x = player.pos[0] + fx * (player.radius + newrad)
         new_pos_y = player.pos[1] + fy * (player.radius + newrad)
-        new_cell = Cell(len(self.cells), [new_pos_x, new_pos_y], [new_veloc_x, new_veloc_y], newrad)
+        new_cell = Cell(len(self.cells), [new_pos_x, new_pos_y], [new_veloc_x, new_veloc_y],
+                        newrad)
         new_cell.stay_in_bounds()
         new_cell.limit_speed()
         self.cells.append(new_cell)
@@ -172,7 +180,7 @@ class World():
         px = sum(self.cells[ele].area() * self.cells[ele].veloc[0] for ele in collision)
         py = sum(self.cells[ele].area() * self.cells[ele].veloc[1] for ele in collision)
         # Determine the biggest cell
-        collision.sort(key = lambda ele: self.cells[ele].radius)
+        collision.sort(key=lambda ele: self.cells[ele].radius)
         biggest = collision.pop()
         self.cells[biggest].radius = (mass / math.pi) ** 0.5
         self.cells[biggest].veloc[0] = px / mass
@@ -193,8 +201,9 @@ class World():
         self.database.append([c.copy() for c in self.cells])
         # New frame
         self.frame_count += 1
-        if self.frame_count == Consts["MAX_FRAME"]: # Time's up
-            self.check_point(self.cells[0].radius <= self.cells[1].radius, self.cells[0].radius >= self.cells[1].radius, "MAX_FRAME")
+        if self.frame_count == Consts["MAX_FRAME"]:  # Time's up
+            self.check_point(self.cells[0].radius <= self.cells[1].radius,
+                             self.cells[0].radius >= self.cells[1].radius, "MAX_FRAME")
             return
         # Update recorders
         self.update_recorders()
@@ -238,20 +247,24 @@ class World():
         theta = [None, None]
         flag = [False, False]
 
-        for i in 0, 1:
-            try:
-                ti = pf()
-                theta[i] = self.player[i].strategy([c.copy() for c in allcells])
-                tf = pf()
-                self.timer[i] -= tf - ti
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                flag[i] = e
+        # TODO: only one player
+        # for i in 0, 1:
+        try:
+            ti = pf()
+            # theta[i] = self.player[i].strategy([c.copy() for c in allcells])
+            theta[0] = self.player[0].strategy([c.copy() for c in allcells])
+            tf = pf()
+            self.timer[0] -= tf - ti
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            flag[0] = e
 
         if self.check_point(flag[0], flag[1], "RUNTIME_ERROR"):
             return
 
-        if self.check_point(not isinstance(theta[0], (int, float, type(None))), not isinstance(theta[1], (int, float, type(None))), "INVALID_RETURN_VALUE"):
+        if self.check_point(not isinstance(theta[0], (int, float, type(None))),
+                            not isinstance(theta[1], (int, float, type(None))),
+                            "INVALID_RETURN_VALUE"):
             return
 
         if self.check_point(self.timer[0] < 0, self.timer[1] < 0, "TIMEOUT"):
@@ -271,7 +284,7 @@ class World():
         if not self.recorders:
             return
         for i, rec in enumerate(self.recorders):
-            rec.frame = self.frame_count # Current frame
+            rec.frame = self.frame_count  # Current frame
             rec.cells_count = len(self.cells)
             rec.timer = self.timer[:]
 

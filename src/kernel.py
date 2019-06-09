@@ -29,7 +29,8 @@ from database import Database
 
 # import custom codes
 null_print = lambda *a, **kw: 0
-plr0 = 'brownian_motion'  # should be put into "code" folder
+# plr0 = 'brownian_motion'  # should be put into "code" folder
+plr0 = 'cxk'  # should be put into "code" folder
 plr1 = 'cxk'
 Player0 = type(tk)('plr0')
 with open('code/%s.py' % plr0, encoding='utf-8') as f:

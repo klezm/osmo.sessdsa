@@ -34,25 +34,33 @@ from database import Database
 
 # import custom codes
 null_print = lambda *a, **kw: 0
-plr0 = 'brownian_motion'  # should be put into "code" folder
+# plr0 = 'brownian_motion'  # should be put into "code" folder
+plr0 = 'no_strategy'  # should be put into "code" folder
 plr1 = 'cxk'
 Player0 = type(tk)('plr0')
 with open('code/%s.py' % plr0, encoding='utf-8') as f:
     exec(f.read(), Player0.__dict__)
-Player1 = type(tk)('plr1')
-with open('code/%s.py' % plr1, encoding='utf-8') as f:
-    exec(f.read(), Player1.__dict__)
-Player0.print = Player1.print = null_print
+# Player1 = type(tk)('plr1')
+# with open('code/%s.py' % plr1, encoding='utf-8') as f:
+#     exec(f.read(), Player1.__dict__)
+# Player0.print = Player1.print = null_print
+Player0.print = null_print
+# Player1 = Player1.Player
 Player0 = Player0.Player
-Player1 = Player1.Player
 
 
 class Application(tk.Frame):
-    def __init__(self, master=None):
+    def __init__(self, master=None, single_player=False):
         super().__init__(master)
-        self.players = [Player0, Player1]
-        self.storages = [{}, {}]
-        self.names = [plr0, plr1]
+        # self.players = [Player0, Player1]
+        # self.players = [Player0].extend([] if single_player else [Player1])
+        self.players = [Player0]
+        # self.storages = [{}, {}]
+        # self.storages = [{}].extend([] if single_player else [{}])
+        self.storages = [{}]
+        # self.names = [plr0, plr1]
+        # self.names = [plr0].extend([] if single_player else [plr1])
+        self.names = [plr0]
         self.master = master
         self.master.title("Osmo")
         self.paused = False
@@ -94,15 +102,18 @@ class Application(tk.Frame):
         self.storages = self.storages[::-1]
         self.players = self.players[::-1]
         self.names = self.names[::-1]
-        title = '%s vs %s' % tuple(self.names)
+        # title = '%s vs %s' % tuple(self.names)
+        title = '%s' % self.names[0]
         self.master.title("Osmo - " + title)
         self.widget["extra"]['text'] = title
         recorders = [WorldStat(Consts["MAX_FRAME"]) for i in "xx"]
         for s, r in zip(self.storages, recorders):
             s["world"] = r
         self.world = World(self.players[0](0, self.storages[0]),
-                           self.players[1](1, self.storages[1]),
-                           ["Plr1", "Plr2"], recorders)
+                           # self.players[1](1, self.storages[1]),
+                           # ["Plr1", "Plr2"],
+                           ["Plr1"],
+                           recorders)
         if not self.paused:
             self.refresh_screen()
 
@@ -197,7 +208,7 @@ class Application(tk.Frame):
         # Advance timer
         current_tick = int(round(time.time() * 1000))
         self.frame_delta = (
-            current_tick - self.last_tick) * Consts["FPS"] / 1000
+                                   current_tick - self.last_tick) * Consts["FPS"] / 1000
         self.last_tick = current_tick
         if self.world.result:
             if Settings["ENABLE_DATABASE"] and not self.world.result["saved"]:
@@ -241,7 +252,8 @@ class Application(tk.Frame):
                         coords[3] + j * Consts["WORLD_Y"],
                         fill=color,
                         outline="")
-            #self.canvas.create_text(cell.pos, fill = "darkblue", font = "Times 20 italic bold", text = "@")
+            # self.canvas.create_text(cell.pos, fill = "darkblue", font = "Times 20 italic
+            # bold", text = "@")
         self.canvas.update()
         next_delta = max(1000 * (1 / Consts["FPS"] - self.frame_delta), 1)
         self.master.after(int(next_delta), self.refresh_screen)
@@ -249,5 +261,5 @@ class Application(tk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = Application(master=root)
+    app = Application(master=root, single_player=True)
     app.mainloop()
